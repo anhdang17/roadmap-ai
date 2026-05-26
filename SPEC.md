@@ -98,14 +98,15 @@ The platform embodies the best of modern SaaS: dark-first design with glassmorph
 ### Authentication (Clerk)
 - Google OAuth + Email/Password
 - Protected routes redirect to `/sign-in?redirect_url=...`
-- Role assignment stored in MongoDB on first sign-in
+- Role stored in Turso `users` table, synced on first sign-in
+- `ADMIN_EMAILS` env var grants ADMIN role to matching email addresses
 - Middleware enforces `ADMIN` role for `/admin/*`
 
 ### AI Roadmap Generation
 1. User enters goal on landing → redirected to sign-in
 2. After auth, shows generation page with animated loading state
 3. Backend calls Gemini 2.5 Flash API with structured prompt
-4. AI returns JSON matching schema → stored in MongoDB
+4. AI returns JSON matching schema → stored in Turso
 5. User redirected to `/roadmap/[id]`
 
 ### Roadmap Display
@@ -113,7 +114,7 @@ The platform embodies the best of modern SaaS: dark-first design with glassmorph
 - **Skill Cards**: Per-skill cards with checkboxes
 - **Project Section**: Highlighted cards for hands-on projects
 - **Progress Bar**: Top bar showing completion percentage
-- **Interactive Checklist**: Click to toggle task completion → saved to MongoDB
+- **Interactive Checklist**: Click to toggle task completion → saved to Turso
 
 ### User Dashboard
 - **Stats Cards**: Total roadmaps, avg completion %, streak days, total tasks done
@@ -191,21 +192,22 @@ The platform embodies the best of modern SaaS: dark-first design with glassmorph
 - **Shadcn UI** component patterns (built from scratch, no CLI)
 
 ### Database
-- **MongoDB Atlas** via `mongoose`
-- Single `MONGODB_URI` connection with singleton pattern
-- Connection established lazily on first API call
+- **Turso (libSQL)** via `@libsql/client` + `drizzle-orm`
+- Drizzle ORM for type-safe queries
+- Connection via `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN`
+- Deployed globally on Turso edge network (no server required)
 
 ### Authentication
-- **Clerk** for auth: `nextjs` package
-- `auth()` helper in server components
-- ` clerkMiddleware()` in middleware.ts
-- Role stored in MongoDB `users` collection, synced on sign-in
+- **Clerk** v6 for auth: `@clerk/nextjs` package
+- `clerkMiddleware()` protects `/dashboard/*`, `/admin/*`, `/generate/*`, `/roadmap/*`
+- Role stored in Turso `users` table, synced on first sign-in
+- Google OAuth + Email/Password support
+- `ADMIN_EMAILS` env var grants admin role
 
 ### AI Integration
 - **Gemini 2.5 Flash** via `@google/generative-ai`
 - Structured JSON prompt with Zod schema validation
 - 3 retry attempts with exponential backoff
-- Rate limiting: 10 requests per user per hour
 
 ### API Design
 All APIs return `{ data, error, message }` envelope.
@@ -230,6 +232,7 @@ All APIs return `{ data, error, message }` envelope.
 **User**
 ```ts
 {
+  id: string;            // UUID
   clerkId: string;       // unique, from Clerk
   name: string;
   email: string;
@@ -243,9 +246,10 @@ All APIs return `{ data, error, message }` envelope.
 **Roadmap**
 ```ts
 {
-  userId: string;        // Clerk user ID
-  goal: string;         // Original user input
-  title: string;        // AI-generated title
+  id: string;            // UUID
+  userId: string;        // foreign key to User
+  goal: string;          // Original user input
+  title: string;         // AI-generated title
   description: string;
   duration: string;
   content: {
@@ -261,6 +265,7 @@ All APIs return `{ data, error, message }` envelope.
 **Progress**
 ```ts
 {
+  id: string;
   userId: string;
   roadmapId: string;
   completedTasks: string[];  // Task IDs completed
@@ -271,10 +276,11 @@ All APIs return `{ data, error, message }` envelope.
 
 ### Performance
 - Server Components by default, `"use client"` only where needed
+- `force-dynamic` on all protected routes for Clerk compatibility
 - Dynamic imports for heavy components (charts, roadmap viewer)
 - Image optimization via `next/image`
 - Route-based code splitting (automatic with App Router)
-- MongoDB connection pooled and reused via singleton
+- Turso connection pooled and reused via singleton
 
 ### SEO
 - `generateMetadata()` on all public pages
