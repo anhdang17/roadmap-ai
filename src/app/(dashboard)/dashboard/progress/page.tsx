@@ -2,163 +2,184 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, CheckCircle2, BookOpen } from "lucide-react";
+import {
+  Loader2,
+  BookOpen,
+  CheckCircle2,
+  TrendingUp,
+  Calendar,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import type { IRoadmap, IProgress } from "@/types";
+
+interface CompletedTask {
+  taskId: string;
+  taskTitle: string;
+  roadmapId: string;
+  roadmapTitle: string;
+  completedAt: string;
+}
 
 interface ProgressData {
-  id: string;
-  roadmapId: string;
-  completedTasks: string[];
-  roadmap: IRoadmap | null;
-  completionPercent: number;
+  completedTasks: CompletedTask[];
+  streak: number;
 }
 
 export default function ProgressPage() {
-  const [progressData, setProgressData] = useState<ProgressData[]>([]);
+  const [progressData, setProgressData] = useState<ProgressData>({
+    completedTasks: [],
+    streak: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/progress");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setProgressData(data.data || []);
-      } catch {
-        // fail silently
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchProgress();
   }, []);
 
-  const avgCompletion =
-    progressData.length > 0
-      ? Math.round(
-          progressData.reduce((sum, p) => sum + p.completionPercent, 0) / progressData.length
-        )
-      : 0;
+  const fetchProgress = async () => {
+    try {
+      const res = await fetch("/api/progress");
+      if (res.ok) {
+        const data = await res.json();
+        setProgressData(data.progress || { completedTasks: [], streak: 0 });
+      }
+    } catch {
+      // handle silently
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const statCards = [
-    {
-      label: "Roadmaps đang học",
-      value: progressData.length,
-      icon: BookOpen,
-      color: "text-violet-400",
-      bg: "bg-violet-500/10",
-    },
-    {
-      label: "Tasks hoàn thành",
-      value: progressData.reduce(
-        (sum, p) => sum + (p.completedTasks?.length || 0),
-        0
-      ),
-      icon: CheckCircle2,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-    },
-    {
-      label: "Completion trung bình",
-      value: `${avgCompletion}%`,
-      icon: TrendingUp,
-      color: "text-amber-400",
-      bg: "bg-amber-500/10",
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
+
+  const completed = progressData.completedTasks || [];
+  const streak = progressData.streak || 0;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Progress</h1>
-        <p className="text-text-secondary mt-1">Theo dõi tiến độ học tập của bạn</p>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-2xl font-bold text-text-primary mb-1">Tiến độ học tập</h1>
+        <p className="text-sm text-text-muted">
+          Theo dõi tất cả bài tập và dự án đã hoàn thành của bạn.
+        </p>
       </motion.div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {loading
-          ? [1, 2, 3].map((i) => (
-              <Card key={i} variant="elevated" className="p-5">
-                <Skeleton className="h-10 w-10 rounded-xl mb-3" />
-                <Skeleton className="h-8 w-16 mb-1" />
-                <Skeleton className="h-3 w-24" />
-              </Card>
-            ))
-          : statCards.map((card, i) => {
-              const Icon = card.icon;
-              return (
-                <motion.div
-                  key={card.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Card variant="elevated" className="p-5">
-                    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${card.bg} mb-3`}>
-                      <Icon className={`h-5 w-5 ${card.color}`} />
-                    </div>
-                    <div className="text-2xl font-bold text-text-primary">{card.value}</div>
-                    <div className="text-xs text-text-muted">{card.label}</div>
-                  </Card>
-                </motion.div>
-              );
-            })}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card variant="elevated" className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary">{completed.length}</p>
+                <p className="text-xs text-text-muted">Bài tập đã hoàn thành</p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card variant="elevated" className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/10">
+                <TrendingUp className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary">{streak}</p>
+                <p className="text-xs text-text-muted">Streak ngày học</p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card variant="elevated" className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-violet-500/10">
+                <BookOpen className="h-5 w-5 text-violet-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary">
+                  {new Set(completed.map((t) => t.roadmapId)).size}
+                </p>
+                <p className="text-xs text-text-muted">Roadmap đã học</p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Chi tiết theo Roadmap</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <h2 className="text-lg font-semibold text-text-primary mb-4">
+          Lịch sử hoàn thành
+        </h2>
 
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} variant="elevated" className="p-5">
-                <Skeleton className="h-5 w-40 mb-3" />
-                <Skeleton className="h-2 w-full rounded-full mb-2" />
-                <Skeleton className="h-3 w-20" />
-              </Card>
-            ))}
-          </div>
-        ) : progressData.length === 0 ? (
+        {completed.length === 0 ? (
           <Card variant="elevated" className="p-10 text-center">
-            <p className="text-sm text-text-secondary">
-              Chưa có dữ liệu tiến độ. Bắt đầu học một roadmap để theo dõi.
-            </p>
+            <div className="flex flex-col items-center gap-3">
+              <CheckCircle2 className="h-8 w-8 text-text-muted" />
+              <p className="text-sm text-text-muted">
+                Chưa có bài tập nào được hoàn thành. Bắt đầu học ngay!
+              </p>
+            </div>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {progressData.map((item, i) => (
+          <div className="space-y-3">
+            {completed.map((task, index) => (
               <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -10 }}
+                key={`${task.taskId}-${task.completedAt}`}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.08 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <a href={`/roadmap/${item.roadmapId}`}>
-                  <Card variant="elevated" className="p-5 hover:border-accent/20 transition-all cursor-pointer">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-semibold text-text-primary">
-                        {item.roadmap?.title || "Untitled Roadmap"}
-                      </h3>
-                      <span className="text-xs font-semibold text-accent">{item.completionPercent}%</span>
-                    </div>
-                    <Progress
-                      value={item.completionPercent}
-                      size="sm"
-                      color={item.completionPercent === 100 ? "success" : "accent"}
-                      className="mb-2"
-                    />
-                    <p className="text-xs text-text-muted">
-                      {item.completedTasks?.length || 0} /{" "}
-                      {(item.roadmap?.content?.months?.reduce(
-                        (s, m) => s + m.tasks.length,
-                        0
-                      )) || 0}{" "}
-                      tasks hoàn thành
+                <Card variant="elevated" className="p-4 flex items-center gap-4">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 shrink-0">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-text-primary truncate">
+                      {task.taskTitle}
                     </p>
-                  </Card>
-                </a>
+                    <p className="text-xs text-text-muted truncate">
+                      {task.roadmapTitle}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-text-muted shrink-0">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(task.completedAt).toLocaleDateString("vi-VN", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </div>
+                </Card>
               </motion.div>
             ))}
           </div>

@@ -22,9 +22,9 @@ import { Avatar } from "@/components/ui/avatar";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/roadmaps", label: "My Roadmaps", icon: BookOpen },
-  { href: "/dashboard/progress", label: "Progress", icon: BarChart3 },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/roadmaps", label: "Lộ trình của tôi", icon: BookOpen },
+  { href: "/dashboard/progress", label: "Tiến độ", icon: BarChart3 },
+  { href: "/dashboard/settings", label: "Cài đặt", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -39,7 +39,7 @@ export function Sidebar() {
       <button
         className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-lg bg-surface border border-border text-text-primary hover:bg-elevated transition-colors"
         onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label="Toggle sidebar"
+        aria-label="Mở sidebar"
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -125,7 +125,7 @@ export function Sidebar() {
               <div className="pt-3 pb-1">
                 <div className="h-px bg-border mx-2" />
                 <p className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-                  Admin
+                  Quản trị
                 </p>
               </div>
               <Link
@@ -139,7 +139,7 @@ export function Sidebar() {
                 )}
               >
                 <Shield className="h-4 w-4 shrink-0 text-text-muted group-hover:text-text-primary" />
-                <span className="flex-1">Admin Panel</span>
+                <span className="flex-1">Bảng quản trị</span>
               </Link>
             </>
           )}
@@ -149,7 +149,7 @@ export function Sidebar() {
           <SignOutButton signOutOptions={{ redirectUrl: "/" }}>
             <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-error hover:bg-error/10 transition-all duration-200">
               <LogOut className="h-4 w-4 shrink-0" />
-              <span>Sign Out</span>
+              <span>Đăng xuất</span>
             </button>
           </SignOutButton>
         </div>

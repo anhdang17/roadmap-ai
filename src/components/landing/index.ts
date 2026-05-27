@@ -1,4 +1,6 @@
-export { HeroSection } from "./hero-section";
-export { FeaturesSection } from "./features-section";
-export { HowItWorksSection } from "./how-it-works-section";
-export { CTASection } from "./cta-section";
+import { HeroSection } from "./hero-section";
+import { FeaturesSection } from "./features-section";
+import { HowItWorksSection } from "./how-it-works-section";
+import { CTASection } from "./cta-section";
+
+export { HeroSection, FeaturesSection, HowItWorksSection, CTASection };

@@ -16,9 +16,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/#features", label: "Features" },
-    { href: "/#how-it-works", label: "How It Works" },
+    { href: "/", label: "Trang chủ" },
+    { href: "/#features", label: "Tính năng" },
+    { href: "/#how-it-works", label: "Cách hoạt động" },
   ];
 
   return (
@@ -58,11 +58,11 @@ export function Navbar() {
               <>
                 <SignInButton mode="modal">
                   <button className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors px-3 py-1.5">
-                    Sign In
+                    Đăng nhập
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <Button size="sm">Get Started</Button>
+                  <Button size="sm">Bắt đầu</Button>
                 </SignUpButton>
               </>
             )}
@@ -71,7 +71,7 @@ export function Navbar() {
           <button
             className="md:hidden p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-elevated transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-label="Mở menu"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -107,11 +107,11 @@ export function Navbar() {
                   <>
                     <SignInButton mode="modal">
                       <button className="w-full text-sm font-medium text-text-secondary hover:text-text-primary transition-colors py-2">
-                        Sign In
+                        Đăng nhập
                       </button>
                     </SignInButton>
                     <SignUpButton mode="modal">
-                      <Button className="w-full" size="sm">Get Started</Button>
+                      <Button className="w-full" size="sm">Bắt đầu</Button>
                     </SignUpButton>
                   </>
                 )}

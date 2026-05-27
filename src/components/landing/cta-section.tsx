@@ -32,7 +32,7 @@ export function CTASection() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-6">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span className="text-accent-light text-sm font-medium">100% Free</span>
+            <span className="text-accent-light text-sm font-medium">Hoàn toàn miễn phí</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-6 leading-tight">
@@ -42,8 +42,8 @@ export function CTASection() {
           </h2>
 
           <p className="text-text-secondary text-base sm:text-lg max-w-xl mx-auto mb-10">
-            Tạo roadmap cá nhân hóa đầu tiên của bạn trong 30 giây. Miễn phí,
-            không cần credit card.
+            Tạo roadmap cá nhân đầu tiên trong 30 giây. Miễn phí,
+            không cần thẻ tín dụng.
           </p>
 
           <Button
@@ -51,7 +51,7 @@ export function CTASection() {
             onClick={handleStart}
             className="shadow-xl shadow-accent/20 group"
           >
-            {isSignedIn ? "Go to Dashboard" : "Start for Free"}
+            {isSignedIn ? "Đến Dashboard" : "Bắt đầu miễn phí"}
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Button>
 

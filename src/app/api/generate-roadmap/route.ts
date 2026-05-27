@@ -1,58 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
+import { generateRoadmap } from "@/lib/gemini";
 import { db } from "@/db";
 import { roadmaps } from "@/db/schema";
-import { generateRoadmapWithGemini } from "@/lib/gemini";
-import { GenerateRoadmapSchema } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
   try {
-    const authUser = await getAuthUser();
+    const user = await getAuthUser();
+    const { goal, category } = await req.json();
 
-    const body = await req.json();
-    const parsed = GenerateRoadmapSchema.safeParse(body);
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.errors[0].message },
-        { status: 400 }
-      );
+    if (!goal?.trim()) {
+      return NextResponse.json({ error: "Vui lòng nhập mục tiêu học tập." }, { status: 400 });
     }
 
-    const { goal } = parsed.data;
+    if (!category?.trim()) {
+      return NextResponse.json({ error: "Vui lòng chọn danh mục." }, { status: 400 });
+    }
 
-    const generated = await generateRoadmapWithGemini(goal);
-    const database = db();
+    const roadmapContent = await generateRoadmap(goal.trim(), category.trim());
 
-    const newRoadmap = await database
+    const [newRoadmap] = await db
       .insert(roadmaps)
       .values({
-        userId: authUser.id,
-        goal,
-        title: generated.title,
-        description: generated.description,
-        duration: generated.duration,
-        content: {
-          months: generated.months,
-          projects: generated.projects,
-          goals: generated.goals,
-        },
+        userId: user.id,
+        title: roadmapContent.title,
+        description: roadmapContent.description,
+        category: roadmapContent.category,
+        content: roadmapContent,
+        goal: goal.trim(),
+        generatedBy: "gemini-2.0-flash",
       })
-      .returning()
-      .get();
+      .returning();
 
-    return NextResponse.json(
-      { data: newRoadmap, message: "Roadmap generated successfully" },
-      { status: 201 }
-    );
-  } catch (error) {
+    return NextResponse.json({ roadmap: newRoadmap }, { status: 201 });
+  } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Bạn cần đăng nhập để thực hiện chức năng này." }, { status: 401 });
     }
     console.error("Generate roadmap error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate roadmap. Please try again." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Đã xảy ra lỗi khi tạo lộ trình. Vui lòng thử lại." }, { status: 500 });
   }
 }

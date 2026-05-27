@@ -1,5 +1,8 @@
 # AI Roadmap Learning Platform — Product Specification
 
+> **Ngôn ngữ giao diện:** Tiếng Việt (vi)
+> **Xác minh SMS:** Đã tắt (được quản lý qua Clerk Dashboard)
+
 ## 1. Concept & Vision
 
 **GoalPlan AI** is a modern AI-powered learning platform that transforms vague learning goals into structured, actionable roadmaps. Users simply state what they want to learn — "I want to learn frontend" — and the AI generates a complete personalized learning journey with monthly phases, weekly tasks, hands-on projects, and progress tracking. The experience feels like having a personal AI career mentor: intelligent, encouraging, and beautifully organized.

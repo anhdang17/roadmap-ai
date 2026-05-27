@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { Search, Wand2, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,11 +37,9 @@ const steps = [
 export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="py-24 relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 bg-grid-pattern opacity-50" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -50,7 +48,7 @@ export function HowItWorksSection() {
           className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-4">
-            <span className="text-accent-light text-sm font-medium">How It Works</span>
+            <span className="text-accent-light text-sm font-medium">Cách hoạt động</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-4">
             3 bước đơn giản để{" "}
@@ -61,9 +59,7 @@ export function HowItWorksSection() {
           </p>
         </motion.div>
 
-        {/* Steps */}
         <div className="relative">
-          {/* Connecting line */}
           <div className="hidden md:block absolute top-16 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-px bg-gradient-to-r from-violet-500/30 via-accent/30 to-emerald-500/30" />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
@@ -83,7 +79,6 @@ export function HowItWorksSection() {
                   className="relative"
                 >
                   <div className="flex flex-col items-center text-center">
-                    {/* Icon circle */}
                     <div
                       className={cn(
                         "relative z-10 flex items-center justify-center w-14 h-14 rounded-2xl border mb-6",
@@ -93,14 +88,13 @@ export function HowItWorksSection() {
                       <Icon className={cn("h-6 w-6", step.color)} />
                     </div>
 
-                    {/* Number */}
-                    <div className="absolute top-10 left-1/2 -translate-x-1/2 md:relative md:top-auto md:left-auto md:translate-x-0 md:mb-2">
+                    <div className="mb-2">
                       <span className="text-5xl font-black text-elevated leading-none select-none">
                         {step.number}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-text-primary mb-3 mt-2 md:mt-0">
+                    <h3 className="text-lg font-semibold text-text-primary mb-3">
                       {step.title}
                     </h3>
                     <p className="text-sm text-text-secondary leading-relaxed max-w-xs">

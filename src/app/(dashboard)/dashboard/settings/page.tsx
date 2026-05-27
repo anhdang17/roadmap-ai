@@ -1,122 +1,121 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { User, Shield, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { User, Save, Loader2, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (user?.fullName || user?.firstName) {
-      setName(user.fullName || user.firstName || "");
-    }
-  }, [user]);
+  const [saved, setSaved] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      toast.error("Name is required");
-      return;
-    }
+    if (!user || !name.trim()) return;
     setSaving(true);
     try {
       const res = await fetch("/api/user", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: name.trim() }),
       });
-      if (!res.ok) throw new Error();
-      toast.success("Profile updated successfully");
-    } catch {
-      toast.error("Failed to update profile");
+      if (res.ok) {
+        await user.update({ firstName: name.trim() });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
     } finally {
       setSaving(false);
     }
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">Settings</h1>
-        <p className="text-text-secondary mt-1">Quản lý thông tin cá nhân</p>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-2xl font-bold text-text-primary mb-1">Cài đặt</h1>
+        <p className="text-sm text-text-muted">
+          Quản lý thông tin tài khoản của bạn.
+        </p>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Card variant="elevated" className="p-6">
-          <h2 className="text-base font-semibold text-text-primary mb-4">Profile Information</h2>
-
-          {!isLoaded ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-elevated animate-pulse" />
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-elevated rounded animate-pulse" />
-                  <div className="h-3 w-48 bg-elevated rounded animate-pulse" />
-                </div>
-              </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card variant="elevated" className="p-6 max-w-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg bg-accent/10">
+              <User className="h-5 w-5 text-accent" />
             </div>
-          ) : (
-            <div className="space-y-5">
-              <div className="flex items-center gap-4">
-                <Avatar
-                  src={user?.imageUrl}
-                  fallback={user?.fullName || user?.firstName || "U"}
-                  size="xl"
-                />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">
-                    {user?.fullName || user?.firstName}
-                  </p>
-                  <p className="text-xs text-text-muted">
-                    {user?.emailAddresses[0]?.emailAddress}
-                  </p>
-                </div>
-              </div>
+            <h2 className="text-lg font-semibold text-text-primary">Thông tin cá nhân</h2>
+          </div>
 
-              <Separator />
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1.5 block">
+                Họ và tên
+              </label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={user?.fullName || user?.firstName || ""}
+                className="max-w-md"
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Full Name
-                </label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                />
-              </div>
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1.5 block">
+                Email
+              </label>
+              <Input
+                value={user?.emailAddresses[0]?.emailAddress || ""}
+                disabled
+                className="max-w-md opacity-60 cursor-not-allowed"
+              />
+              <p className="text-xs text-text-muted mt-1">Email không thể thay đổi.</p>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Role
-                </label>
-                <div>
-                  <Badge variant={user?.publicMetadata?.role === "ADMIN" ? "admin" : "default"}>
-                    {user?.publicMetadata?.role === "ADMIN" ? "Admin" : "User"}
-                  </Badge>
-                </div>
-              </div>
+            <div>
+              <label className="text-sm font-medium text-text-secondary mb-1.5 block">
+                Vai trò
+              </label>
+              <Input
+                value={user?.publicMetadata?.role === "ADMIN" ? "Quản trị viên" : "Người dùng"}
+                disabled
+                className="max-w-md opacity-60 cursor-not-allowed"
+              />
+            </div>
 
-              <Separator />
-
-              <Button onClick={handleSave} disabled={saving}>
-                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Save Changes
+            <div className="pt-2">
+              <Button onClick={handleSave} disabled={saving || !name.trim()}>
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : saved ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {saving ? "Đang lưu..." : saved ? "Đã lưu!" : "Lưu thay đổi"}
               </Button>
             </div>
-          )}
+          </div>
         </Card>
       </motion.div>
     </div>

@@ -1,36 +1,28 @@
-import { type Metadata } from "next";
-import { Sparkles } from "lucide-react";
+"use client";
+
 import Link from "next/link";
+import { Home, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 text-center max-w-md mx-auto">
-        {/* 404 */}
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-accent/10 border border-accent/20 mb-6">
-          <Sparkles className="h-10 w-10 text-accent" />
-        </div>
-
-        <h1 className="text-5xl font-black text-text-primary mb-3">404</h1>
-        <p className="text-xl font-semibold text-text-primary mb-3">
-          Page not found
-        </p>
-        <p className="text-text-secondary mb-8">
-          Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
-        </p>
-
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-medium hover:bg-accent-hover transition-colors"
-        >
-          <Sparkles className="h-4 w-4" />
-          Back to Home
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
+      <h1 className="text-6xl font-bold text-text-primary mb-4">404</h1>
+      <p className="text-lg text-text-secondary mb-8">
+        Trang bạn đang tìm không tồn tại.
+      </p>
+      <div className="flex items-center gap-3">
+        <Link href="/">
+          <Button>
+            <Home className="h-4 w-4" />
+            Về trang chủ
+          </Button>
         </Link>
+        <Button variant="secondary" onClick={() => window.history.back()}>
+          <ArrowLeft className="h-4 w-4" />
+          Quay lại
+        </Button>
       </div>
-    </main>
+    </div>
   );
 }

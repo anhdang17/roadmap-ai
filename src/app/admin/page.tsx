@@ -3,158 +3,181 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
+  Loader2,
+  TrendingUp,
   Users,
   BookOpen,
-  TrendingUp,
-  Brain,
-  Loader2,
+  BarChart3,
+  Clock,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 
 interface Stats {
   totalUsers: number;
   totalRoadmaps: number;
-  activeUsers: number;
-  aiRequestsToday: number;
+  totalCompletions: number;
 }
 
-export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
+interface RecentUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
+
+export default function AdminPage() {
+  const [stats, setStats] = useState<Stats>({
+    totalUsers: 0,
+    totalRoadmaps: 0,
+    totalCompletions: 0,
+  });
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/admin/stats");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setStats(data.data || { totalUsers: 0, totalRoadmaps: 0, activeUsers: 0, aiRequestsToday: 0 });
-      } catch {
-        // fail silently
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchStats();
   }, []);
 
-  const cards = [
-    {
-      label: "Total Users",
-      value: stats?.totalUsers ?? "—",
-      icon: Users,
-      color: "text-violet-400",
-      bg: "bg-violet-500/10",
-    },
-    {
-      label: "Total Roadmaps",
-      value: stats?.totalRoadmaps ?? "—",
-      icon: BookOpen,
-      color: "text-accent-light",
-      bg: "bg-accent/10",
-    },
-    {
-      label: "Active Users (7d)",
-      value: stats?.activeUsers ?? "—",
-      icon: TrendingUp,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-    },
-    {
-      label: "AI Requests Today",
-      value: stats?.aiRequestsToday ?? "—",
-      icon: Brain,
-      color: "text-amber-400",
-      bg: "bg-amber-500/10",
-    },
-  ];
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("/api/admin/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data.stats || { totalUsers: 0, totalRoadmaps: 0, totalCompletions: 0 });
+        setRecentUsers(data.recentUsers || []);
+      }
+    } catch {
+      // handle silently
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      {/* Header */}
+    <div className="space-y-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary">
-          Admin Dashboard
-        </h1>
-        <p className="text-text-secondary mt-1">
-          Tổng quan hệ thống GoalPlan AI
+        <h1 className="text-2xl font-bold text-text-primary mb-1">Bảng quản trị</h1>
+        <p className="text-sm text-text-muted">
+          Quản lý người dùng và xem thống kê hệ thống.
         </p>
       </motion.div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading
-          ? [1, 2, 3, 4].map((i) => (
-              <Card key={i} variant="elevated" className="p-5">
-                <Skeleton className="h-10 w-10 rounded-xl mb-3" />
-                <Skeleton className="h-8 w-16 mb-1" />
-                <Skeleton className="h-3 w-20" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[
+          {
+            label: "Tổng người dùng",
+            value: stats.totalUsers,
+            icon: Users,
+            color: "text-violet-400",
+            bg: "bg-violet-500/10",
+          },
+          {
+            label: "Tổng Roadmap",
+            value: stats.totalRoadmaps,
+            icon: BookOpen,
+            color: "text-accent-light",
+            bg: "bg-accent/10",
+          },
+          {
+            label: "Tổng hoàn thành",
+            value: stats.totalCompletions,
+            icon: TrendingUp,
+            color: "text-emerald-400",
+            bg: "bg-emerald-500/10",
+          },
+        ].map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+            >
+              <Card variant="elevated" className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 rounded-xl ${stat.bg}`}>
+                    <Icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
+                    <p className="text-xs text-text-muted">{stat.label}</p>
+                  </div>
+                </div>
               </Card>
-            ))
-          : cards.map((card, i) => {
-              const Icon = card.icon;
-              return (
-                <motion.div
-                  key={card.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                >
-                  <Card variant="elevated" className="p-5 hover:border-accent/20 transition-all">
-                    <div
-                      className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${card.bg} mb-3`}
-                    >
-                      <Icon className={`h-5 w-5 ${card.color}`} />
-                    </div>
-                    <div className="text-2xl font-bold text-text-primary mb-0.5">
-                      {card.value}
-                    </div>
-                    <div className="text-xs text-text-muted font-medium">
-                      {card.label}
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
+            </motion.div>
+          );
+        })}
       </div>
 
-      {/* Quick links */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <h2 className="text-lg font-semibold text-text-primary mb-4">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <a href="/admin/users">
-            <Card
-              variant="glass"
-              className="p-5 hover:border-violet-500/30 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-violet-400" />
-                <span className="text-sm font-medium text-text-primary">Manage Users</span>
-              </div>
-            </Card>
-          </a>
-          <a href="/admin/analytics">
-            <Card
-              variant="glass"
-              className="p-5 hover:border-violet-500/30 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-accent-light" />
-                <span className="text-sm font-medium text-text-primary">View Analytics</span>
-              </div>
-            </Card>
-          </a>
-        </div>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Người dùng gần đây</h2>
+        {recentUsers.length === 0 ? (
+          <Card variant="elevated" className="p-6 text-center">
+            <Users className="h-8 w-8 text-text-muted mx-auto mb-2" />
+            <p className="text-sm text-text-muted">Chưa có người dùng nào.</p>
+          </Card>
+        ) : (
+          <Card variant="elevated" className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Tên</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Email</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Vai trò</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Ngày tham gia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentUsers.map((user, index) => (
+                    <tr key={user.id} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 text-sm text-text-primary font-medium">{user.name || "—"}</td>
+                      <td className="px-4 py-3 text-sm text-text-secondary">{user.email}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          user.role === "ADMIN"
+                            ? "bg-violet-500/10 text-violet-400"
+                            : "bg-elevated text-text-secondary"
+                        }`}>
+                          {user.role === "ADMIN" ? "Quản trị" : "Người dùng"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-text-muted">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(user.createdAt).toLocaleDateString("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
       </motion.div>
     </div>
   );

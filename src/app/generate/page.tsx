@@ -1,182 +1,199 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import {
+  Loader2,
+  Sparkles,
+  Zap,
+  ArrowRight,
+  Clock,
+  ChevronDown,
+} from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-function GenerateContent() {
+const categories = [
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "Data Science",
+  "Machine Learning",
+  "Mobile Developer",
+  "DevOps",
+  "Cloud Computing",
+  "Cybersecurity",
+  "UI/UX Design",
+  "Product Management",
+  "Marketing",
+  "Kế toán",
+  "Tiếng Anh",
+  "Khác",
+];
+
+function GenerateForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const goal = searchParams.get("goal") || "";
-  const [status, setStatus] = useState<"idle" | "generating" | "success" | "error">("idle");
+  const { isSignedIn } = useAuth();
+
+  const [goal, setGoal] = useState(searchParams.get("goal") || "");
+  const [category, setCategory] = useState("");
+  const [showCategories, setShowCategories] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const g = searchParams.get("goal");
+    if (g) setGoal(g);
+  }, [searchParams]);
+
   const handleGenerate = async () => {
-    if (!goal.trim()) return;
-    setStatus("generating");
+    if (!goal.trim() || !category) {
+      setError("Vui lòng nhập mục tiêu và chọn danh mục.");
+      return;
+    }
+
+    setGenerating(true);
     setError("");
 
     try {
       const res = await fetch("/api/generate-roadmap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal: goal.trim() }),
+        body: JSON.stringify({ goal: goal.trim(), category }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to generate roadmap");
+        setError(data.error || "Đã xảy ra lỗi. Vui lòng thử lại.");
+        return;
       }
 
-      setStatus("success");
-      setTimeout(() => {
-        router.push(`/roadmap/${data.data._id}`);
-      }, 1500);
-    } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      router.push(`/roadmap/${data.roadmap.id}`);
+    } catch {
+      setError("Đã xảy ra lỗi mạng. Vui lòng thử lại.");
+    } finally {
+      setGenerating(false);
     }
   };
 
   return (
-    <main className="min-h-screen pt-16 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen pt-24 pb-16 px-4 flex items-center justify-center">
+      <div className="w-full max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-4">
+            <Sparkles className="h-3.5 w-3.5 text-accent" />
+            <span className="text-accent-light text-sm font-medium">Được hỗ trợ bởi Gemini AI</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3">
+            Tạo lộ trình học tập
+          </h1>
+          <p className="text-text-secondary text-base">
+            Mô tả mục tiêu học tập và AI sẽ tạo lộ trình cá nhân cho bạn.
+          </p>
+        </motion.div>
 
-      <div className="relative z-10 w-full max-w-xl">
-        {status === "idle" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 mb-6">
-              <Sparkles className="h-8 w-8 text-accent" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
-              Tạo Roadmap cho bạn
-            </h1>
-            <p className="text-text-secondary mb-8 max-w-md mx-auto">
-              AI đang sẵn sàng tạo lộ trình học cá nhân hóa cho mục tiêu của bạn.
-            </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card variant="elevated" className="p-6 sm:p-8">
+            <div className="space-y-5">
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-2 block">
+                  Mục tiêu học tập *
+                </label>
+                <textarea
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  placeholder="Ví dụ: Tôi muốn học Frontend Developer trong 3 tháng..."
+                  rows={4}
+                  className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 resize-none transition-all"
+                />
+              </div>
 
-            {goal && (
-              <Card variant="elevated" className="p-4 mb-6 text-left">
-                <p className="text-xs text-text-muted mb-1">Mục tiêu của bạn</p>
-                <p className="text-text-primary font-medium">&ldquo;{goal}&rdquo;</p>
-              </Card>
-            )}
+              <div>
+                <label className="text-sm font-medium text-text-secondary mb-2 block">
+                  Danh mục *
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowCategories(!showCategories)}
+                    className="w-full flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm text-left transition-all hover:border-accent/30 focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  >
+                    <span className={category ? "text-text-primary" : "text-text-muted"}>
+                      {category || "Chọn danh mục"}
+                    </span>
+                    <ChevronDown className={`h-4 w-4 text-text-muted transition-transform ${showCategories ? "rotate-180" : ""}`} />
+                  </button>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {showCategories && (
+                    <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-surface shadow-xl max-h-60 overflow-y-auto">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            setCategory(cat);
+                            setShowCategories(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-elevated transition-colors ${
+                            category === cat ? "text-accent bg-accent/5" : "text-text-primary"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-4 py-3">
+                  {error}
+                </p>
+              )}
+
               <Button
                 size="lg"
                 onClick={handleGenerate}
-                disabled={!goal.trim()}
-                className="shadow-lg shadow-accent/20"
+                disabled={generating || !goal.trim() || !category}
+                className="w-full"
               >
-                <Sparkles className="h-4 w-4" />
-                Bắt đầu tạo roadmap
-                <ArrowRight className="h-4 w-4" />
+                {generating ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Đang tạo lộ trình...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5" />
+                    Tạo lộ trình với AI
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
               </Button>
-              <Link href="/dashboard">
-                <Button variant="secondary" size="lg">
-                  Hủy
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        )}
 
-        {status === "generating" && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 mb-6">
-              <Loader2 className="h-8 w-8 text-accent animate-spin" />
+              <div className="flex items-center justify-center gap-1 text-xs text-text-muted">
+                <Clock className="h-3 w-3" />
+                Thường mất khoảng 10-30 giây để tạo
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
-              AI đang tạo roadmap...
-            </h1>
-            <p className="text-text-secondary mb-8 max-w-md mx-auto">
-              Gemini AI đang phân tích mục tiêu và thiết kế lộ trình học tập tối ưu cho bạn.
-              Thường mất khoảng 5-15 giây.
-            </p>
-
-            {/* Loading steps */}
-            <div className="space-y-3 max-w-sm mx-auto text-left">
-              {[
-                "Phân tích mục tiêu học tập...",
-                "Nghiên cứu kỹ năng cần thiết...",
-                "Thiết kế timeline và dự án...",
-                "Hoàn tất roadmap cá nhân hóa...",
-              ].map((step, i) => (
-                <motion.div
-                  key={step}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.5 }}
-                  className="flex items-center gap-3 text-sm text-text-secondary"
-                >
-                  <Loader2 className="h-3.5 w-3.5 text-accent animate-spin shrink-0" />
-                  {step}
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {status === "success" && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mb-6">
-              <CheckCircle2 className="h-8 w-8 text-emerald-400" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
-              Roadmap đã sẵn sàng!
-            </h1>
-            <p className="text-text-secondary">
-              Đang chuyển đến roadmap của bạn...
-            </p>
-          </motion.div>
-        )}
-
-        {status === "error" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 mb-6">
-              <Sparkles className="h-8 w-8 text-red-400" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
-              Đã xảy ra lỗi
-            </h1>
-            <p className="text-text-secondary mb-8 max-w-md mx-auto">
-              {error || "Không thể tạo roadmap. Vui lòng thử lại."}
-            </p>
-            <Button
-              size="lg"
-              onClick={() => setStatus("idle")}
-              variant="secondary"
-            >
-              Thử lại
-            </Button>
-          </motion.div>
-        )}
+          </Card>
+        </motion.div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -184,12 +201,12 @@ export default function GeneratePage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen flex items-center justify-center pt-16">
-          <Loader2 className="h-8 w-8 text-accent animate-spin" />
-        </main>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin text-accent" />
+        </div>
       }
     >
-      <GenerateContent />
+      <GenerateForm />
     </Suspense>
   );
 }

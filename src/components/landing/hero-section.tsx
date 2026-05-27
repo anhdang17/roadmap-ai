@@ -46,7 +46,7 @@ export function HeroSection() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-sm">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span className="text-accent-light font-medium">Powered by Gemini AI</span>
+            <span className="text-accent-light font-medium">Được hỗ trợ bởi Gemini AI</span>
           </div>
         </motion.div>
 
@@ -56,10 +56,11 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-text-primary leading-tight tracking-tight mb-6"
         >
-          Your{" "}
-          <span className="text-gradient">AI Learning</span>
+          Lộ trình học
           <br />
-          Roadmap
+          <span className="text-gradient">cá nhân hóa</span>
+          <br />
+          bằng AI
         </motion.h1>
 
         <motion.p
@@ -68,7 +69,7 @@ export function HeroSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-base sm:text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed"
         >
-          Nhập mục tiêu học tập và AI sẽ tạo lộ trình học cá nhân hóa cho bạn.
+          Nhập mục tiêu học tập và AI sẽ tạo lộ trình cá nhân cho bạn.
           <br className="hidden sm:block" />
           Theo dõi tiến độ, hoàn thành bài tập, xây dựng dự án thực tế.
         </motion.p>
@@ -85,7 +86,7 @@ export function HeroSection() {
                 value={goal}
                 onChange={(e) => setGoal(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-                placeholder="Vd: Tôi muốn học Frontend Developer"
+                placeholder="Ví dụ: Tôi muốn học Frontend Developer"
                 className="h-12 text-base bg-surface/80 border-border/80 focus:border-accent/50 shadow-xl shadow-black/20"
               />
             </div>
@@ -96,13 +97,13 @@ export function HeroSection() {
               className="h-12 px-6 text-base shadow-lg shadow-accent/20"
             >
               <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Generate</span>
-              <span className="sm:hidden">Go</span>
+              <span className="hidden sm:inline">Tạo roadmap</span>
+              <span className="sm:hidden">Tạo</span>
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
           <p className="mt-3 text-xs text-text-muted">
-            Miễn phí · Không cần credit card · Tạo roadmap trong 30 giây
+            Miễn phí · Không cần thẻ tín dụng · Tạo roadmap trong 30 giây
           </p>
         </motion.div>
 
@@ -137,7 +138,7 @@ export function HeroSection() {
         transition={{ delay: 1, duration: 0.5 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-text-muted"
       >
-        <span className="text-xs">Scroll down</span>
+        <span className="text-xs">Cuộn xuống</span>
         <div className="w-5 h-8 rounded-full border border-border flex items-start justify-center p-1">
           <div className="w-1 h-2 rounded-full bg-accent animate-bounce" />
         </div>

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Zap, Github, Twitter } from "lucide-react";
+import { Zap } from "lucide-react";
 
 const footerLinks = [
-  { href: "/", label: "Home" },
-  { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/", label: "Trang chủ" },
+  { href: "/#features", label: "Tính năng" },
+  { href: "/#how-it-works", label: "Cách hoạt động" },
 ];
 
 export function Footer() {
@@ -12,7 +12,6 @@ export function Footer() {
     <footer className="border-t border-border bg-surface/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-accent/10 border border-accent/20">
               <Zap className="h-4 w-4 text-accent" />
@@ -22,7 +21,6 @@ export function Footer() {
             </span>
           </div>
 
-          {/* Links */}
           <div className="flex items-center gap-6">
             {footerLinks.map((link) => (
               <Link
@@ -35,9 +33,8 @@ export function Footer() {
             ))}
           </div>
 
-          {/* Copyright */}
           <p className="text-sm text-text-muted">
-            © {new Date().getFullYear()} GoalPlan AI. All rights reserved.
+            © {new Date().getFullYear()} GoalPlan AI. Mọi quyền được bảo lưu.
           </p>
         </div>
       </div>

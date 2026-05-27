@@ -1,64 +1,38 @@
+import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import "./globals.css";
+
 export const dynamic = "force-dynamic";
 
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "sonner";
-import { ClerkProvider } from "@clerk/nextjs";
-import { cn } from "@/lib/utils";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: {
-    default: "GoalPlan AI — Your AI Learning Roadmap",
-    template: "%s | GoalPlan AI",
-  },
+  title: "GoalPlan AI - Lộ trình học tập cá nhân hóa bằng AI",
   description:
-    "Nhập mục tiêu học tập và AI sẽ tạo lộ trình học cá nhân hóa cho bạn.",
-  keywords: ["AI learning roadmap", "personalized learning", "learning platform"],
-  authors: [{ name: "GoalPlan AI" }],
-  openGraph: {
-    type: "website",
-    locale: "vi_VN",
-    url: "https://goalplan.ai",
-    siteName: "GoalPlan AI",
-    title: "GoalPlan AI — Your AI Learning Roadmap",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "GoalPlan AI — Your AI Learning Roadmap",
-  },
-  icons: {
-    icon: "/favicon.svg",
-  },
+    "Tạo lộ trình học tập cá nhân hóa với AI. Theo dõi tiến độ, hoàn thành bài tập, xây dựng dự án thực tế.",
+  keywords: ["AI roadmap", "học tập", "lộ trình học", "Gemini AI", "cá nhân hóa"],
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <ClerkProvider>
-      <html lang="vi" className="dark">
-        <body className={cn(inter.variable, jetbrainsMono.variable, "antialiased min-h-screen")}>
-          {children}
+      <html lang="vi">
+        <body className="antialiased">
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           <Toaster
-            position="bottom-right"
+            position="top-right"
             toastOptions={{
               style: {
-                background: "var(--bg-surface)",
+                background: "var(--surface)",
                 border: "1px solid var(--border)",
                 color: "var(--text-primary)",
               },

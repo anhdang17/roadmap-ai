@@ -6,70 +6,60 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const authUser = await getAuthUser();
-    const { id } = await params;
+    await getAuthUser();
 
-    const database = db();
-
-    const roadmap = await database
+    const [roadmap] = await db
       .select()
       .from(roadmaps)
-      .where(eq(roadmaps.id, id))
-      .get();
+      .where(eq(roadmaps.id, params.id))
+      .limit(1);
 
     if (!roadmap) {
-      return NextResponse.json({ error: "Roadmap not found" }, { status: 404 });
+      return NextResponse.json({ error: "Không tìm thấy lộ trình." }, { status: 404 });
     }
 
-    if (roadmap.userId !== authUser.id && authUser.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    return NextResponse.json({ data: roadmap });
-  } catch (error) {
+    return NextResponse.json({ roadmap });
+  } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Bạn cần đăng nhập." }, { status: 401 });
     }
     console.error("Get roadmap error:", error);
-    return NextResponse.json({ error: "Failed to fetch roadmap" }, { status: 500 });
+    return NextResponse.json({ error: "Đã xảy ra lỗi khi lấy lộ trình." }, { status: 500 });
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const authUser = await getAuthUser();
-    const { id } = await params;
+    const user = await getAuthUser();
 
-    const database = db();
-
-    const roadmap = await database
+    const [existing] = await db
       .select()
       .from(roadmaps)
-      .where(eq(roadmaps.id, id))
-      .get();
+      .where(eq(roadmaps.id, params.id))
+      .limit(1);
 
-    if (!roadmap) {
-      return NextResponse.json({ error: "Roadmap not found" }, { status: 404 });
+    if (!existing) {
+      return NextResponse.json({ error: "Không tìm thấy lộ trình." }, { status: 404 });
     }
 
-    if (roadmap.userId !== authUser.id && authUser.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (existing.userId !== user.id && user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Bạn không có quyền xóa lộ trình này." }, { status: 403 });
     }
 
-    await database.delete(roadmaps).where(eq(roadmaps.id, id));
+    await db.delete(roadmaps).where(eq(roadmaps.id, params.id));
 
-    return NextResponse.json({ message: "Roadmap deleted" });
-  } catch (error) {
+    return NextResponse.json({ message: "Đã xóa lộ trình thành công." });
+  } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Bạn cần đăng nhập." }, { status: 401 });
     }
     console.error("Delete roadmap error:", error);
-    return NextResponse.json({ error: "Failed to delete roadmap" }, { status: 500 });
+    return NextResponse.json({ error: "Đã xảy ra lỗi khi xóa lộ trình." }, { status: 500 });
   }
 }
